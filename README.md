@@ -1,6 +1,6 @@
 # 加密 KOL 日报归档
 
-纯静态、中文暗色网站，无依赖、无 CDN；所有页面与脚本在 `dist/`，可直接打开 `dist/index.html`。筛选数据内嵌页面，不依赖 fetch 或服务器。X 链接仅在点击后访问外部网站。
+纯静态、中文暗色网站，无依赖、无 CDN；所有页面与脚本在 `dist/`，可直接打开 `dist/index.html`。筛选数据内嵌页面，不依赖 fetch 或服务器。首页等页面浏览器端直连 Binance 公开行情展示主流币实时价，仍无 npm 依赖。X 链接仅在点击后访问外部网站。
 
 ## 构建
 
@@ -40,4 +40,5 @@ npm run build
 - `build.mjs`：扫描输入、解析 CSV、生成页面与静态资源。
 - `site.css`：布局、主题与移动端样式。
 - `tables.js`：本地搜索、过滤、日期切换与排序。
+- `prices.js`：浏览器直连 Binance 公开行情，渲染主流币实时价带。
 - `dist/index.html`、`dist/chance.html`、`dist/kols.html`、`dist/reports/<日期>.html`。
