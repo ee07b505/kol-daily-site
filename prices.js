@@ -92,32 +92,38 @@
     if (sourceEl) sourceEl.textContent = label;
   }
 
-  function render(map, sourceLabel) {
+  function chipHtml(base, row) {
+    if (!row) {
+      return `<span class="price-item" role="listitem"><span class="price-sym">${base}</span><span class="price-val">—</span><span class="price-chg flat">—</span></span>`;
+    }
+    const dir = row.pct > 0 ? 'up' : row.pct < 0 ? 'down' : 'flat';
+    return `<span class="price-item" role="listitem"><span class="price-sym">${base}</span><span class="price-val">$${formatPrice(row.price)}</span><span class="price-chg ${dir}">${formatPct(row.pct)}</span></span>`;
+  }
+
+  function paintTrack(map) {
     if (!track) return;
-    track.innerHTML = SYMBOLS.map(({ base }) => {
-      const row = map.get(base);
-      if (!row) {
-        return `<div class="price-item" role="listitem"><span class="price-sym">${base}</span><span class="price-val">—</span><span class="price-chg flat">—</span></div>`;
-      }
-      const dir = row.pct > 0 ? 'up' : row.pct < 0 ? 'down' : 'flat';
-      return `<div class="price-item" role="listitem"><span class="price-sym">${base}</span><span class="price-val">$${formatPrice(row.price)}</span><span class="price-chg ${dir}">${formatPct(row.pct)}</span></div>`;
-    }).join('');
+    const chips = SYMBOLS.map(({ base }) => chipHtml(base, map ? map.get(base) : null)).join('<span class="price-sep" aria-hidden="true">·</span>');
+    // Duplicate for seamless marquee; aria-hidden on clone.
+    track.innerHTML =
+      `<div class="price-ticker-group">${chips}</div>` +
+      `<div class="price-ticker-group" aria-hidden="true">${chips}</div>`;
+  }
+
+  function render(map, sourceLabel) {
+    paintTrack(map);
     if (sourceLabel) {
       lastSource = sourceLabel;
       setSource(sourceLabel);
     }
     if (updatedEl) {
-      updatedEl.textContent = `更新于北京时间 ${beijingNow()}`;
+      updatedEl.textContent = `北京时间 ${beijingNow()}`;
       updatedEl.dataset.hadUpdate = '1';
     }
   }
 
   function placeholders() {
-    if (!track || track.children.length) return;
-    track.innerHTML = SYMBOLS.map(
-      ({ base }) =>
-        `<div class="price-item" role="listitem"><span class="price-sym">${base}</span><span class="price-val">—</span><span class="price-chg flat">—</span></div>`
-    ).join('');
+    if (!track || track.querySelector('.price-item')) return;
+    paintTrack(null);
   }
 
   async function fetchBinance() {
