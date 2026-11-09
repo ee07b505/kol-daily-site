@@ -10,14 +10,24 @@
     { base: 'HYPE', pair: 'HYPEUSDT', gecko: 'hyperliquid' },
     { base: 'NEAR', pair: 'NEARUSDT', gecko: 'near' },
     { base: 'ZEC', pair: 'ZECUSDT', gecko: 'zcash' },
+    { base: '哈基米', gecko: 'hakimi' },
+    { base: 'PONS', gecko: 'pons' },
+    { base: 'STONKS', gecko: 'stonks-9' },
   ];
+  const SPOT_SYMBOLS = SYMBOLS.filter((s) => s.pair);
+  const EXTRA_SYMBOLS = SYMBOLS.filter((s) => !s.pair);
   const BINANCE_URL =
     'https://data-api.binance.vision/api/v3/ticker/24hr?symbols=' +
-    encodeURIComponent(JSON.stringify(SYMBOLS.map((s) => s.pair)));
-  const GECKO_URL =
-    'https://api.coingecko.com/api/v3/simple/price?ids=' +
-    SYMBOLS.map((s) => s.gecko).join(',') +
-    '&vs_currencies=usd&include_24hr_change=true';
+    encodeURIComponent(JSON.stringify(SPOT_SYMBOLS.map((s) => s.pair)));
+  function geckoUrl(list) {
+    return (
+      'https://api.coingecko.com/api/v3/simple/price?ids=' +
+      list.map((s) => s.gecko).join(',') +
+      '&vs_currencies=usd&include_24hr_change=true'
+    );
+  }
+  const GECKO_URL = geckoUrl(SYMBOLS);
+  const GECKO_EXTRA_URL = geckoUrl(EXTRA_SYMBOLS);
   const POLL_MS = 30_000;
   const FAIL_BEFORE_FALLBACK = 2;
 
@@ -126,6 +136,19 @@
     paintTrack(null);
   }
 
+  function parseGecko(data, list) {
+    const map = new Map();
+    for (const { base, gecko } of list) {
+      const row = data[gecko];
+      if (!row || row.usd == null) continue;
+      map.set(base, {
+        price: Number(row.usd),
+        pct: Number(row.usd_24h_change),
+      });
+    }
+    return map;
+  }
+
   async function fetchBinance() {
     const res = await fetch(BINANCE_URL, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -133,7 +156,7 @@
     if (!Array.isArray(data)) throw new Error('bad payload');
     const byPair = new Map(data.map((row) => [row.symbol, row]));
     const map = new Map();
-    for (const { base, pair } of SYMBOLS) {
+    for (const { base, pair } of SPOT_SYMBOLS) {
       const row = byPair.get(pair);
       if (!row) continue;
       map.set(base, {
@@ -145,32 +168,42 @@
     return map;
   }
 
-  async function fetchGecko() {
-    const res = await fetch(GECKO_URL, { cache: 'no-store' });
+  async function fetchGecko(url, list) {
+    const res = await fetch(url, { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     if (!data || typeof data !== 'object') throw new Error('bad payload');
-    const map = new Map();
-    for (const { base, gecko } of SYMBOLS) {
-      const row = data[gecko];
-      if (!row || row.usd == null) continue;
-      map.set(base, {
-        price: Number(row.usd),
-        pct: Number(row.usd_24h_change),
-      });
-    }
+    const map = parseGecko(data, list);
     if (!map.size) throw new Error('empty');
     return map;
+  }
+
+  async function mergeExtras(map) {
+    if (!EXTRA_SYMBOLS.length) return { map, extrasOk: true };
+    try {
+      const extras = await fetchGecko(GECKO_EXTRA_URL, EXTRA_SYMBOLS);
+      for (const [base, row] of extras) map.set(base, row);
+      return { map, extrasOk: true };
+    } catch (_) {
+      return { map, extrasOk: false };
+    }
   }
 
   async function refresh() {
     if (document.hidden) return;
     try {
-      const map = await fetchBinance();
+      let map = await fetchBinance();
       binanceFails = 0;
+      const merged = await mergeExtras(map);
+      map = merged.map;
       lastOk = map;
-      render(map, 'Binance 公开行情（USDT）');
-      setStatus('');
+      render(
+        map,
+        merged.extrasOk
+          ? 'Binance 公开行情（USDT）；哈基米 / PONS / STONKS 为 CoinGecko'
+          : 'Binance 公开行情（USDT）'
+      );
+      setStatus(merged.extrasOk ? '' : '部分代币行情暂时不可用', !merged.extrasOk);
       return;
     } catch (_) {
       binanceFails += 1;
@@ -178,7 +211,7 @@
 
     if (binanceFails >= FAIL_BEFORE_FALLBACK) {
       try {
-        const map = await fetchGecko();
+        const map = await fetchGecko(GECKO_URL, SYMBOLS);
         lastOk = map;
         render(map, 'CoinGecko（USD，回退）');
         setStatus('');
