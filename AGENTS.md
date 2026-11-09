@@ -43,7 +43,7 @@ npm run build          # node build.mjs；需 Node >= 20
 
 ## 4. Domain & Business Invariants
 
-- 价带 12 币：Binance USDT 现货 `BTC ETH SOL BNB XRP DOGE HYPE NEAR ZEC`；无现货对的 `哈基米`（CoinGecko `hakimi`，BSC `0x82Ec31D69b3c289E541b50E30681FD1ACAd24444`）、`PONS`（`pons`，Robinhood Chain `0x39dBED3a2bd333467115dE45665cC57F813C4571`）、`STONKS`（`stonks-9`，BSC `0xc9d825E83AadA475bD4d38C8ca984eD746277777`）每次从 CoinGecko 补价。
+- 价带 12 币：Binance USDT 现货 `BTC ETH SOL BNB XRP DOGE HYPE NEAR ZEC`；无现货对的 `哈基米`（CoinGecko `hakimi`，BSC `0x82Ec31D69b3c289E541b50E30681FD1ACAd24444`）、`PONS`（`pons`，Robinhood Chain `0x39dBED3a2bd333467115dE45665cC57F813C4571`）、`STONKS`（`stonks-4`，交易代码 STNK，Solana `43VWkd99HjqkhFTZbWBpMpRhjG469nWa7x7uEsgSH7We`）每次从 CoinGecko 补价。
 - 轮询间隔 30 秒；有现货对的走 Binance USDT，无现货对的走 CoinGecko；Binance 连续失败后整条价带回退 CoinGecko USD；页面 `document.hidden` 时暂停轮询；UI 标明当前来源。
 - 筛选 / 表格数据仍内嵌页面，不依赖 fetch；实时价是刻意例外。
 - 不伪造价格、不提供离线假数据冒充实时行情。

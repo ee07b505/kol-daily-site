@@ -12,7 +12,7 @@
     { base: 'ZEC', pair: 'ZECUSDT', gecko: 'zcash' },
     { base: '哈基米', gecko: 'hakimi' },
     { base: 'PONS', gecko: 'pons' },
-    { base: 'STONKS', gecko: 'stonks-9' },
+    { base: 'STONKS', gecko: 'stonks-4' },
   ];
   const SPOT_SYMBOLS = SYMBOLS.filter((s) => s.pair);
   const EXTRA_SYMBOLS = SYMBOLS.filter((s) => !s.pair);
