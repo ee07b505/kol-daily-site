@@ -40,5 +40,5 @@ npm run build
 - `build.mjs`：扫描输入、解析 CSV、生成页面与静态资源。
 - `site.css`：布局、主题与移动端样式。
 - `tables.js`：本地搜索、过滤、日期切换与排序。
-- `prices.js`：浏览器直连 Binance 现货与 CoinGecko 公开行情，渲染实时价带（含哈基米、PONS、STONKS）。
+- `prices.js`：浏览器直连 Binance 现货与 CoinGecko 公开行情，渲染实时价带（含 AVAX，以及哈基米、PONS、STONKS）。
 - `dist/index.html`、`dist/chance.html`、`dist/kols.html`、`dist/reports/<日期>.html`。

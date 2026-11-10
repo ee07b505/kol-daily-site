@@ -4,6 +4,7 @@
     { base: 'BTC', pair: 'BTCUSDT', gecko: 'bitcoin' },
     { base: 'ETH', pair: 'ETHUSDT', gecko: 'ethereum' },
     { base: 'SOL', pair: 'SOLUSDT', gecko: 'solana' },
+    { base: 'AVAX', pair: 'AVAXUSDT', gecko: 'avalanche-2' },
     { base: 'BNB', pair: 'BNBUSDT', gecko: 'binancecoin' },
     { base: 'XRP', pair: 'XRPUSDT', gecko: 'ripple' },
     { base: 'DOGE', pair: 'DOGEUSDT', gecko: 'dogecoin' },
